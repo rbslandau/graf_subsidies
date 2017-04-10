@@ -3,7 +3,7 @@
 # Nadin Graf, Roman Bucher, Ralf B. Schäfer, Martin H. Entling
 
 #----------------------------------------------------------------------------------------
-# Contrasting short-term effects of aquatic subsidies on a recipient and simplified food web
+# Contrasting effects of aquatic subsidies on a simplified recipient food web
 #----------------------------------------------------------------------------------------
 # submitted to Biology Letters
 
@@ -20,24 +20,27 @@
 # The code has been written to reproduce
 # See 'graf_dataset.xls' for details
 
-#############################
-#      important notes      #
-#############################
+#######################
+#      Structure      #
+#######################
 
 #Structure of the code:
-# I # STATISTICS -------------------------------------------------------> line 45 to 156
-# I.1 # indirect effects of aquatic subsidies on terrestrial plants-----> line 88 to 116
-# I.2 # indirect effects of aquatic subsidies on terrestrial herbivores-> line 117 to 136
-# I.3 # indirect effects of aquatic subsidies on terrestrial spiders----> line 137 to 158
-# II # FIGURES ---------------------------------------------------------> line 159 to 288
-# II.1 # Treatment vs. plants ------------------------------------------> line 168 to 238
-# II.2 # Treatment vs. herbivores --------------------------------------> line 238 to 283
-# II.3 # combine plots -------------------------------------------------> line 284 to 238
-#----------------------------------------------------------------------------------------
+# I # STATISTICS -------------------------------------------------------
+# I.1 # indirect effects of aquatic subsidies on terrestrial plants-----
+# I.2 # indirect effects of aquatic subsidies on terrestrial herbivores-
+# I.3 # indirect effects of aquatic subsidies on terrestrial spiders----
+# II # FIGURES ---------------------------------------------------------
+# II.1 # Treatment vs. plants ------------------------------------------
+# II.2 # Treatment vs. herbivores --------------------------------------
+# II.3 # combine plots -------------------------------------------------
+#-----------------------------------------------------------------------
 
 # Set the path to your working directory here
-pfad = "~/Literatur/Publications/2017/Nadin"
+pfad = "~/Literatur/Publications/2017/Nadin/"
 setwd(pfad)
+
+# we download the dataset from github
+download.file("https://github.com/rbslandau/graf_subsidies/blob/master/Dataset.xls?raw=true", destfile = paste0(pfad, "Dataset.xls"))
 
 #############################
 #        STATISTICS         #
@@ -80,15 +83,17 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=TRUE, conf.in
   return(datac)
 }
 
-
+####################################################################
 #### indirect effects of aquatic subsdies on terrestrial plants ####
-wb <- loadWorkbook("graf_dataset.xls")
+
+wb <- loadWorkbook("Dataset.xls")
 dat <- readWorksheet(wb, sheet = 2, colTypes = c("character", "numeric", "character", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
 # herbivory: leaf area eaten by herbivores
 # Leaf surface from start of experiment minus leaf area left at the end of the experiment
 
-herb_1 <- dat$herb + 0.5/10^6  # a small value is for the glmm in the gamma family to run
+herb_1 <- dat$herb + 0.5/10^6  
+# a small value is added for the glmm in the gamma family to run
 # 0s cannot be calculated with a gamma-distribution
 dat$Treatment <- factor(dat$Treatment)
 pm1 <- glmmPQL(herb_1 ~ Treatment, random=~1|Replicate, family = Gamma(link ='log'), dat)
@@ -111,46 +116,43 @@ pm5 <- glmmPQL(Mass~Treatment, random=~1|Replicate, family = poisson, dat)
 summary(glht(model = pm5, linfct = mcp(Treatment = "Tukey")))
 
 
-
+####################################################################
 #### indirect effects of aquatic subsidies on terrestrial herbivores ####
 
-dath<-read.table("Data Mesocosm_prey predator.csv",header=TRUE, sep=",")
-datp<-dath[dath$prey == 'weevil', ]  # per mesocosm
+dath <- readWorksheet(wb, sheet = 4, colTypes = c("character", "numeric", "numeric", "character", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+datp <- dath[dath$prey == 'weevil', ]  # per mesocosm
+datp$Treatment <- factor(datp$Treatment)
 
 # survival of Phyllobius sp.
-hm1<-glm(Phyllobius~Treatment, family = poisson, datp) 
+hm1 <- glm(Phyllobius~Treatment, family = poisson, datp) 
 anova(hm1, test = "Chisq")
 
 # survival of leafhoppers
-hm2<-glm(Cicadina~Treatment, family = poisson, datp) 
+hm2 <- glm(Cicadina~Treatment, family = poisson, datp) 
 anova(hm2, test = "Chisq")
 
 # difference between the indirect effect of aquatic subsidies on herbivore response
-dath$resp <- 100/dath$introduced*dath$survived
-xy<-glmmPQL(resp~Treatment*prey,random=~1|Replicate,  family = negative.binomial(theta = 1), dath)
+dath$resp <- 100/dath$introduced * dath$survived
+xy <- glmmPQL(resp ~ Treatment * prey, random = ~1|Replicate, family = negative.binomial(theta = 1), dath)
 summary(xy)
 
 #### direct effects of aquatic subsidies on terrestrial spiders ####
 
 # survival of Pisaura mirablils
-sm1<-glm(SurvPis~Treatment, family = poisson, datp)
+sm1 <- glm(SurvPis ~ Treatment, family = poisson, datp)
 anova(sm1, test = "Chisq")
 
 # growth of mass of Pisaura mirablis             
-sm2<-lm(PMG~Treatment, datp)
+sm2 <- lm(PMG ~ Treatment, datp)
 summary(sm2)
       
 # width of prosoma of Pisaura mirablis      
-sm3<-glm(PPWE~Treatment, family = poisson, datp)
+sm3 <- glm(PPWE ~ Treatment, family = poisson, datp)
 anova(sm3, test = "Chisq")        
 
 # Replacement of Tetragnatha sp.      
-sm4<-glm(ReplTet~Treatment, family = poisson, datp)
+sm4 <- glm(ReplTet ~ Treatment, family = poisson, datp)
 anova(sm4, test = "Chisq")
-
-
-
-
 
 #############################
 #          FIGURES          #
@@ -164,9 +166,9 @@ pd <- position_dodge(0) # manually specify position
 ##### Treatment vs. plant ########
 
 # Herbivory
-herb.dat<- summarySE(dat, measurevar="herb", groupvars="Treatment")
-herb<-ggplot(herb.dat, aes(Treatment, herb, cex=1)) +
-  geom_errorbar(aes(ymin=herb-se, ymax=herb+se), width=0.1,
+herb.dat <- summarySE(dat, measurevar="herb", groupvars= "Treatment")
+herb <- ggplot(herb.dat, aes(Treatment, herb, cex=1)) +
+  geom_errorbar(aes(ymin = herb - se, ymax = herb + se), width=0.1,
                 size = 0.15, colour = "black", position = pd) +
   geom_line(linetype="blank", position = pd) +
   geom_point(size = 2)+
@@ -186,9 +188,9 @@ herb<-ggplot(herb.dat, aes(Treatment, herb, cex=1)) +
 herb
 
 
-Mass.dat<- summarySE(dat, measurevar="Mass", groupvars="Treatment")
-Mass<-ggplot(Mass.dat, aes(Treatment, Mass, cex=1)) +
-  geom_errorbar(aes(ymin=Mass-se, ymax=Mass+se), width=0.1,
+Mass.dat <- summarySE(dat, measurevar="Mass", groupvars="Treatment")
+Mass <- ggplot(Mass.dat, aes(Treatment, Mass, cex=1)) +
+  geom_errorbar(aes(ymin = Mass-se, ymax= Mass+se), width=0.1,
                 size = 0.15, colour = "black", position = pd) +
   geom_line(linetype="blank", position = pd) +
   geom_point(size = 2)+
@@ -207,10 +209,9 @@ Mass<-ggplot(Mass.dat, aes(Treatment, Mass, cex=1)) +
   annotate("text",x=3,y=2.85,label="b")
 Mass
 
-
-Growth.dat<- summarySE(dat, measurevar="Growth", groupvars="Treatment")
-Growth<-ggplot(Growth.dat, aes(Treatment, Growth, cex=1)) +
-  geom_errorbar(aes(ymin=Growth-se, ymax=Growth+se), width=0.1,
+Growth.dat <- summarySE(dat, measurevar="Growth", groupvars = "Treatment")
+Growth <- ggplot(Growth.dat, aes(Treatment, Growth, cex=1)) +
+  geom_errorbar(aes(ymin = Growth-se, ymax = Growth+se), width=0.1,
                 size = 0.15, colour = "black", position = pd) +
   geom_line(linetype="blank", position = pd) +
   geom_point(size = 2)+
@@ -232,8 +233,8 @@ Growth
 
 ##### Treatment vs. herbivore #####
 
-Phyl.dat<- summarySE(datp, measurevar="Phyllobius", groupvars="Treatment")
-Phyl<-ggplot(Phyl.dat, aes(Treatment, Phyllobius, cex=1)) +
+Phyl.dat <- summarySE(datp, measurevar="Phyllobius", groupvars="Treatment")
+Phyl <- ggplot(Phyl.dat, aes(Treatment, Phyllobius, cex=1)) +
   geom_errorbar(aes(ymin=Phyllobius-se, ymax=Phyllobius+se), width=0.1,
                 size = 0.15, colour = "black", position = pd) +
   geom_line(linetype="blank", position = pd) +
@@ -254,9 +255,8 @@ Phyl<-ggplot(Phyl.dat, aes(Treatment, Phyllobius, cex=1)) +
 Phyl
 
 
-
-Cic.dat<- summarySE(datp, measurevar="Cicadina", groupvars="Treatment")
-Cic<-ggplot(Cic.dat, aes(Treatment, Cicadina, cex=1)) +
+Cic.dat <- summarySE(datp, measurevar="Cicadina", groupvars="Treatment")
+Cic <- ggplot(Cic.dat, aes(Treatment, Cicadina, cex=1)) +
   geom_errorbar(aes(ymin=Cicadina-se, ymax=Cicadina+se), width=0.1,
                 size = 0.15, colour = "black", position = pd) +
   geom_line(linetype="blank", position = pd) +
@@ -277,7 +277,7 @@ Cic
 
 
 ##### combine plots ########
-res<-plot_grid(Cic, herb, Phyl, Growth, NULL, Mass, 
+res <- plot_grid(Cic, herb, Phyl, Growth, NULL, Mass, 
                labels = c("A", "C", "B", "D",' ' , "E"), 
                align='v', nrow=3, ncol = 2)
 res

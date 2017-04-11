@@ -1,4 +1,4 @@
-Repo for the publication "Contrasting effects of aquatic subsidies on a simplified recipient food web"
+Repo for the publication "Contrasting effects of aquatic subsidies on a terrestrial trophic cascade"
 ====================================================================================================================
 
 This repo contains the script and data for the related publication under review

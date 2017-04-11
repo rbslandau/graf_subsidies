@@ -3,7 +3,7 @@
 # Nadin Graf, Roman Bucher, Ralf B. Schäfer, Martin H. Entling
 
 #----------------------------------------------------------------------------------------
-# Contrasting effects of aquatic subsidies on a simplified recipient food web
+# Contrasting effects of aquatic subsidies on a terrestrial trophic cascade
 #----------------------------------------------------------------------------------------
 # submitted to Biology Letters
 
@@ -144,7 +144,7 @@ anova(sm1, test = "Chisq")
 
 # growth of mass of Pisaura mirablis             
 sm2 <- lm(PMG ~ Treatment, datp)
-summary(sm2)
+anova(sm2)
       
 # width of prosoma of Pisaura mirablis      
 sm3 <- glm(PPWE ~ Treatment, family = poisson, datp)

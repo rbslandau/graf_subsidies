@@ -1,7 +1,7 @@
 Repo for the publication "Contrasting effects of aquatic subsidies on a terrestrial trophic cascade"
 ====================================================================================================================
 
-This repo contains the script and data for the related publication under review
+This repo contains the script and data for the related publication in [Biology Letters 13 (2017)](http://rsbl.royalsocietypublishing.org/content/13/5/20170129.long)
 
 Script written by Nadin Graf, revised by Ralf B. Schäfer
   
